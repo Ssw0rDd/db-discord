@@ -71,54 +71,6 @@ npm run db:push      # apply Prisma schema to SQLite
 npm run lint         # tsc --noEmit
 ```
 
-## Publish to GitHub
-
-The project is **not** a git repo until you initialize it. Never commit `.env` (secrets).
-
-### 1. Create repo on GitHub
-
-1. Go to [github.com/new](https://github.com/new)
-2. Name it e.g. `db-discord`
-3. **Do not** add README/license/gitignore (you already have them locally)
-4. Create repository and copy the HTTPS or SSH URL
-
-### 2. Initialize and push (first time)
-
-```bash
-cd d:\BOTS\Db-Discord
-
-git init
-git add .
-git status   # confirm .env is NOT listed
-git commit -m "Initial commit: Db-Discord bot"
-
-git branch -M main
-git remote add origin https://github.com/YOUR_USER/db-discord.git
-git push -u origin main
-```
-
-If `git status` shows `.env`, check `.gitignore` contains `.env` before committing.
-
-### 3. Later updates
-
-```bash
-git add .
-git commit -m "Describe your change"
-git push
-```
-
-### 4. Clone on another machine
-
-```bash
-git clone https://github.com/YOUR_USER/db-discord.git
-cd db-discord
-cp .env.example .env
-# edit .env with tokens
-npm install
-npm run db:push
-npm run dev
-```
-
 ### Optional: GitHub CLI
 
 ```bash
