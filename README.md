@@ -33,22 +33,6 @@ Fill `DISCORD_TOKEN`, `DISCORD_CLIENT_ID`, `DISCORD_GUILD_ID`, `GITHUB_PAT`, `AD
 
 See **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** for folder layout, request flow, and where to change features.
 
-## Publish to GitHub
-
-This folder is not a git repo until you run `git init`. **Never commit `.env`** (tokens).
-
-```bash
-cd db-discord
-git init
-git add .
-git status          # .env must NOT appear
-git commit -m "Initial commit: Db-Discord bot"
-git branch -M main
-git remote add origin https://github.com/YOUR_USER/db-discord.git
-git push -u origin main
-```
-
-Create the empty repo on GitHub first: [github.com/new](https://github.com/new). Full steps in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#publish-to-github).
 
 ## Discord commands
 
