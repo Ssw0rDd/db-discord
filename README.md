@@ -59,7 +59,3 @@ Create the empty repo on GitHub first: [github.com/new](https://github.com/new).
 | `/search` | Search commits |
 | `/compare` | Compare refs |
 | `/config` | Bot settings (language, chart, roles) |
-
-## License
-
-MIT
