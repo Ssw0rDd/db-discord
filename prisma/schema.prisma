@@ -1,0 +1,172 @@
+// Database schema (SQLite). After changes: npm run db:push
+// Models: GuildConfig (per-server settings), Project, Commit, AuditLog
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model GuildConfig {
+  id                   String   @id @default(cuid())
+  discordGuildId       String   @unique
+  backupCategoryId     String?
+  githubOrg            String?
+  githubInstallationId String?
+  language             String   @default("en-US")
+  chartStyle           String   @default("line")
+  adminRoleIds         String   @default("")
+  interactRoleIds      String   @default("")
+  viewRoleIds          String   @default("")
+  manageUserIds        String   @default("")
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  projects             Project[]
+}
+
+model Project {
+  id              String   @id @default(cuid())
+  guildConfigId   String
+  guildConfig     GuildConfig @relation(fields: [guildConfigId], references: [id], onDelete: Cascade)
+  githubRepoId    BigInt   @unique
+  fullName        String
+  name            String
+  defaultBranch   String   @default("main")
+  discordChannelId String? @unique
+  panelMessageId  String?
+  webhookId       BigInt?
+  webhookSecret   String?
+  isActive        Boolean  @default(true)
+  lastSyncedAt    DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  commits         CommitRecord[]
+  branches        BranchRecord[]
+  releases        ReleaseRecord[]
+  favorites       FavoriteVersion[]
+  restoreHistory  RestoreRecord[]
+  permissions     ProjectPermission[]
+
+  @@index([fullName])
+  @@index([guildConfigId])
+}
+
+model CommitRecord {
+  id              String   @id @default(cuid())
+  projectId       String
+  project         Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  sha             String
+  shortSha        String
+  message         String
+  authorName      String
+  authorEmail     String
+  authorDate      DateTime
+  branch          String
+  tag             String?
+  filesChanged    Int      @default(0)
+  additions       Int      @default(0)
+  deletions       Int      @default(0)
+  discordThreadId String?  @unique
+  discordMessageId String?
+  isPinned        Boolean  @default(false)
+  isRelease       Boolean  @default(false)
+  createdAt       DateTime @default(now())
+
+  @@unique([projectId, sha])
+  @@index([sha])
+  @@index([authorName])
+  @@index([branch])
+  @@index([authorDate])
+  @@index([message])
+}
+
+model BranchRecord {
+  id          String   @id @default(cuid())
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  name        String
+  sha         String
+  isDefault   Boolean  @default(false)
+  updatedAt   DateTime @updatedAt
+
+  @@unique([projectId, name])
+}
+
+model ReleaseRecord {
+  id          String   @id @default(cuid())
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  githubId    BigInt
+  tagName     String
+  name        String?
+  body        String?
+  sha         String
+  publishedAt DateTime
+  createdAt   DateTime @default(now())
+
+  @@unique([projectId, githubId])
+  @@index([tagName])
+}
+
+model FavoriteVersion {
+  id          String   @id @default(cuid())
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  sha         String
+  label       String?
+  userId      String
+  createdAt   DateTime @default(now())
+
+  @@unique([projectId, sha, userId])
+}
+
+model RestoreRecord {
+  id          String   @id @default(cuid())
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  sha         String
+  userId      String
+  userName    String
+  status      String   @default("PENDING")
+  details     String?
+  createdAt   DateTime @default(now())
+  completedAt DateTime?
+
+  @@index([projectId])
+}
+
+model ProjectPermission {
+  id          String   @id @default(cuid())
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  discordUserId String
+  role        String   @default("VIEWER")
+  createdAt   DateTime @default(now())
+
+  @@unique([projectId, discordUserId])
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  guildId     String
+  userId      String?
+  action      String
+  resource    String
+  resourceId  String?
+  metadata    String?
+  ipAddress   String?
+  createdAt   DateTime @default(now())
+
+  @@index([guildId, createdAt])
+  @@index([action])
+}
+
+model SyncCursor {
+  id          String   @id @default(cuid())
+  projectId   String   @unique
+  lastCommitSha String?
+  lastSyncAt  DateTime @default(now())
+}
